@@ -87,6 +87,8 @@ async function createOrUpdateRowInPrLinkDb(taskId) {
 async function findNotionRowByPrNumber(prNumber) {
     const notionToken = core.getInput("notion_token");
     const notionPrLinkDbId = core.getInput("notion_pr_link_db_id");
+    const notionPropertiesConfig = (0, config_1.getNotionPropertiesConfig)();
+    core.info(`🔍 Searching for Notion row with PR number ${prNumber}`);
     const res = await (0, node_fetch_1.default)(`https://api.notion.com/v1/databases/${notionPrLinkDbId}/query`, {
         method: "POST",
         headers: {
@@ -96,7 +98,7 @@ async function findNotionRowByPrNumber(prNumber) {
         },
         body: JSON.stringify({
             filter: {
-                property: "PR Number",
+                property: notionPropertiesConfig.notionPropertyPrNumber,
                 number: { equals: prNumber },
             },
         }),
@@ -106,6 +108,7 @@ async function findNotionRowByPrNumber(prNumber) {
         core.setFailed(`❌ Notion API error: ${error.message}`);
         return null;
     }
+    core.info(`✅ Found Notion row for PR number ${prNumber}`);
     const data = await res.json();
     return data.results[0].id || null;
 }
@@ -218,6 +221,7 @@ async function updateNotionRow(rowid, pr, taskId) {
 async function createNotionRow(pr, taskId) {
     const notionToken = core.getInput("notion_token");
     const notionPrLinkDbId = core.getInput("notion_pr_link_db_id");
+    core.info(`🔄 Creating Notion row for PR number ${pr.number}`);
     const res = await (0, node_fetch_1.default)("https://api.notion.com/v1/pages", {
         method: "POST",
         headers: {
