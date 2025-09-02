@@ -1,0 +1,23 @@
+name: "PR to Notion Sync"
+description: "Sync GitHub PRs with Notion tickets"
+author: "Alexandru Burla"
+inputs:
+  notion_token:
+    description: "Notion integration token"
+    required: true
+  tickets_db_id:
+    description: "Notion Tickets Database ID"
+    required: true
+  prs_db_id:
+    description: "Notion PRs Database ID"
+    required: true
+  notion_ticket_id:
+    description: "Notion Ticket ID property"
+    required: true
+    default: "ID"
+runs:
+  using: "node20"
+  main: "dist/index.js"
+branding:
+  icon: "git-pull-request"
+  color: "blue"
