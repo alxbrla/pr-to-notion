@@ -18,7 +18,7 @@ async function run() {
     const prTitle = pr.title;
     const prNumber = pr.number;
     const prUrl = pr.html_url;
-    const repo = github.context.repo.full_name;
+    const { owner, repo } = github.context.repo;
 
     core.info(`🔍 PR Title: ${prTitle}`);
 
@@ -60,6 +60,7 @@ async function run() {
       await commentPR(
         octokit,
         repo,
+        owner,
         prNumber,
         `✅ Linked ticket [${ticketId}](${ticketUrl})`
       );
@@ -128,12 +129,13 @@ async function addPrToNotion(
   if (!res.ok) throw new Error(`Notion insert failed: ${await res.text()}`);
 }
 
-async function commentPR(octokit, repo, prNumber, body) {
+async function commentPR(octokit, repo, owner, prNumber, body) {
   core.info(`💬 Commenting on PR #${prNumber}: ${body}`);
   core.info(`💬 Repo: ${repo}`);
+  core.info(`💬 Owner: ${owner}`);
   await octokit.rest.issues.createComment({
-    owner: repo.split("/")[0],
-    repo: repo.split("/")[1],
+    owner: owner,
+    repo: repo,
     issue_number: prNumber,
     body,
   });
