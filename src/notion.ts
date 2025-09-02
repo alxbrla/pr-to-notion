@@ -43,8 +43,6 @@ export async function findTaskUrlInNotion(
 }
 
 export async function createOrUpdateRowInPrLinkDb(taskId: string) {
-  const notionToken = core.getInput("notion_token");
-  const notionPrLinkDbId = core.getInput("notion_pr_link_db_id");
   const pr = github.context.payload.pull_request;
 
   if (!pr) {
@@ -106,8 +104,6 @@ function getPrState(pr: any) {
 }
 
 function getNotionPayload(pr: any, notionTasks: string[]) {
-  const notionPrLinkDbId = core.getInput("notion_pr_link_db_id");
-
   const notionPropertiesConfig = getNotionPropertiesConfig();
   const properties: any = {
     Name: {
@@ -184,10 +180,7 @@ function getNotionPayload(pr: any, notionTasks: string[]) {
     };
   }
 
-  return {
-    parent: { database_id: notionPrLinkDbId },
-    properties,
-  };
+  return properties;
 }
 
 async function updateNotionRow(rowid: string, pr: any, taskId: string) {
@@ -200,7 +193,10 @@ async function updateNotionRow(rowid: string, pr: any, taskId: string) {
       "Content-Type": "application/json",
       "Notion-Version": "2022-06-28",
     },
-    body: JSON.stringify(getNotionPayload(pr, [taskId])),
+    body: JSON.stringify({
+      parent: { page_id: rowid },
+      properties: getNotionPayload(pr, [taskId]),
+    }),
   });
 
   if (!res.ok) {
@@ -214,6 +210,7 @@ async function updateNotionRow(rowid: string, pr: any, taskId: string) {
 
 async function createNotionRow(pr: any, taskId: string) {
   const notionToken = core.getInput("notion_token");
+  const notionPrLinkDbId = core.getInput("notion_pr_link_db_id");
 
   const res = await fetch("https://api.notion.com/v1/pages", {
     method: "POST",
@@ -222,7 +219,10 @@ async function createNotionRow(pr: any, taskId: string) {
       "Content-Type": "application/json",
       "Notion-Version": "2022-06-28",
     },
-    body: JSON.stringify(getNotionPayload(pr, [taskId])),
+    body: JSON.stringify({
+      parent: { database_id: notionPrLinkDbId },
+      properties: getNotionPayload(pr, [taskId]),
+    }),
   });
 
   if (!res.ok) {
