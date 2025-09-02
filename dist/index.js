@@ -35974,36 +35974,63 @@ async function addPrToNotion(
   },
   notionConfig
 ) {
+  const properties = {
+    Name: { title: [{ text: { content: prTitle } }] },
+  };
+
+  if (notionPrUrl) {
+    properties[notionConfig.notionPrUrl] = { url: notionPrUrl };
+  }
+  if (notionTasks) {
+    properties[notionConfig.notionTasks] = { relation: [{ id: notionTasks }] };
+  }
+  if (notionPrNumber) {
+    properties[notionConfig.notionPrNumber] = { number: notionPrNumber };
+  }
+  if (notionCreatedAt) {
+    properties[notionConfig.notionCreatedAt] = {
+      date: { start: notionCreatedAt },
+    };
+  }
+  if (notionUpdatedAt) {
+    properties[notionConfig.notionUpdatedAt] = {
+      date: { start: notionUpdatedAt },
+    };
+  }
+  if (notionClosedAt) {
+    properties[notionConfig.notionClosedAt] = {
+      date: { start: notionClosedAt },
+    };
+  }
+  if (notionMergedAt) {
+    properties[notionConfig.notionMergedAt] = {
+      date: { start: notionMergedAt },
+    };
+  }
+  if (notionCreator) {
+    properties[notionConfig.notionCreator] = {
+      rich_text: [{ text: { content: notionCreator } }],
+    };
+  }
+  if (notionDescription) {
+    properties[notionConfig.notionDescription] = {
+      rich_text: [{ text: { content: notionDescription } }],
+    };
+  }
+  if (notionReviewer && notionReviewer.length > 0) {
+    properties[notionConfig.notionReviewer] = {
+      multi_select: notionReviewer.map((r) => ({ name: r })),
+    };
+  }
+  if (notionState) {
+    properties[notionConfig.notionPropertyState] = {
+      select: { name: notionState },
+    };
+  }
+
   const payload = {
     parent: { database_id: dbId },
-    properties: {
-      Name: { title: [{ text: { content: prTitle } }] },
-      [notionConfig.notionPrUrl]: { url: notionPrUrl },
-      [notionConfig.notionTasks]: { relation: [{ id: notionTasks }] },
-      [notionConfig.notionPrNumber]: { number: notionPrNumber },
-      [notionConfig.notionCreatedAt]: {
-        date: { start: notionCreatedAt },
-      },
-      [notionConfig.notionUpdatedAt]: {
-        date: { start: notionUpdatedAt },
-      },
-      [notionConfig.notionClosedAt]: {
-        date: { start: notionClosedAt },
-      },
-      [notionConfig.notionMergedAt]: {
-        date: { start: notionMergedAt },
-      },
-      [notionConfig.notionCreator]: {
-        rich_text: [{ text: { content: notionCreator } }],
-      },
-      [notionConfig.notionDescription]: {
-        rich_text: [{ text: { content: notionDescription } }],
-      },
-      [notionConfig.notionReviewer]: {
-        multi_select: notionReviewer.map((r) => ({ name: r })),
-      },
-      [notionConfig.notionPropertyState]: { select: { name: notionState } },
-    },
+    properties,
   };
 
   core.info(`➕ Payload: ${JSON.stringify(payload, null, 2)}`);
