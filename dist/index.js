@@ -33879,6 +33879,474 @@ function wrappy (fn, cb) {
 
 /***/ }),
 
+/***/ 2973:
+/***/ (function(__unused_webpack_module, exports, __nccwpck_require__) {
+
+"use strict";
+
+var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    var desc = Object.getOwnPropertyDescriptor(m, k);
+    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
+      desc = { enumerable: true, get: function() { return m[k]; } };
+    }
+    Object.defineProperty(o, k2, desc);
+}) : (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    o[k2] = m[k];
+}));
+var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
+    Object.defineProperty(o, "default", { enumerable: true, value: v });
+}) : function(o, v) {
+    o["default"] = v;
+});
+var __importStar = (this && this.__importStar) || (function () {
+    var ownKeys = function(o) {
+        ownKeys = Object.getOwnPropertyNames || function (o) {
+            var ar = [];
+            for (var k in o) if (Object.prototype.hasOwnProperty.call(o, k)) ar[ar.length] = k;
+            return ar;
+        };
+        return ownKeys(o);
+    };
+    return function (mod) {
+        if (mod && mod.__esModule) return mod;
+        var result = {};
+        if (mod != null) for (var k = ownKeys(mod), i = 0; i < k.length; i++) if (k[i] !== "default") __createBinding(result, mod, k[i]);
+        __setModuleDefault(result, mod);
+        return result;
+    };
+})();
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.getNotionPropertiesConfig = getNotionPropertiesConfig;
+const core = __importStar(__nccwpck_require__(7484));
+function getNotionPropertiesConfig() {
+    return {
+        notionPropertyAssignee: core.getInput("notion_property_assignee"),
+        notionPropertyClosedAt: core.getInput("notion_property_closed_at"),
+        notionPropertyCreatedAt: core.getInput("notion_property_created_at"),
+        notionPropertyCreator: core.getInput("notion_property_creator"),
+        notionPropertyDescription: core.getInput("notion_property_description"),
+        notionPropertyMergedAt: core.getInput("notion_property_merged_at"),
+        notionPropertyPrNumber: core.getInput("notion_property_pr_number"),
+        notionPropertyReviewer: core.getInput("notion_property_reviewer"),
+        notionPropertyState: core.getInput("notion_property_state"),
+        notionPropertyUpdatedAt: core.getInput("notion_property_updated_at"),
+        notionPropertyTasks: core.getInput("notion_property_tasks"),
+        notionPropertyPrUrl: core.getInput("notion_property_pr_url"),
+    };
+}
+
+
+/***/ }),
+
+/***/ 9248:
+/***/ (function(__unused_webpack_module, exports, __nccwpck_require__) {
+
+"use strict";
+
+var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    var desc = Object.getOwnPropertyDescriptor(m, k);
+    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
+      desc = { enumerable: true, get: function() { return m[k]; } };
+    }
+    Object.defineProperty(o, k2, desc);
+}) : (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    o[k2] = m[k];
+}));
+var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
+    Object.defineProperty(o, "default", { enumerable: true, value: v });
+}) : function(o, v) {
+    o["default"] = v;
+});
+var __importStar = (this && this.__importStar) || (function () {
+    var ownKeys = function(o) {
+        ownKeys = Object.getOwnPropertyNames || function (o) {
+            var ar = [];
+            for (var k in o) if (Object.prototype.hasOwnProperty.call(o, k)) ar[ar.length] = k;
+            return ar;
+        };
+        return ownKeys(o);
+    };
+    return function (mod) {
+        if (mod && mod.__esModule) return mod;
+        var result = {};
+        if (mod != null) for (var k = ownKeys(mod), i = 0; i < k.length; i++) if (k[i] !== "default") __createBinding(result, mod, k[i]);
+        __setModuleDefault(result, mod);
+        return result;
+    };
+})();
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.commentPR = commentPR;
+const core = __importStar(__nccwpck_require__(7484));
+const github = __importStar(__nccwpck_require__(3228));
+async function commentPR(message) {
+    const pr = github.context.payload.pull_request;
+    if (!pr) {
+        core.setFailed("❌ This action only runs on pull_request events.");
+        return;
+    }
+    if (!process.env.GITHUB_TOKEN) {
+        core.setFailed("❌ GITHUB_TOKEN is not set.");
+        return;
+    }
+    const prNumber = pr.number;
+    const { owner, repo } = github.context.repo;
+    const octokit = github.getOctokit(process.env.GITHUB_TOKEN);
+    const { data: comments } = await octokit.rest.issues.listComments({
+        owner,
+        repo,
+        issue_number: prNumber,
+    });
+    const alreadyCommented = comments.some((c) => c.body?.includes(message));
+    if (alreadyCommented) {
+        return;
+    }
+    await octokit.rest.issues.createComment({
+        owner: owner,
+        repo: repo,
+        issue_number: prNumber,
+        body: message,
+    });
+}
+
+
+/***/ }),
+
+/***/ 9407:
+/***/ (function(__unused_webpack_module, exports, __nccwpck_require__) {
+
+"use strict";
+
+var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    var desc = Object.getOwnPropertyDescriptor(m, k);
+    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
+      desc = { enumerable: true, get: function() { return m[k]; } };
+    }
+    Object.defineProperty(o, k2, desc);
+}) : (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    o[k2] = m[k];
+}));
+var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
+    Object.defineProperty(o, "default", { enumerable: true, value: v });
+}) : function(o, v) {
+    o["default"] = v;
+});
+var __importStar = (this && this.__importStar) || (function () {
+    var ownKeys = function(o) {
+        ownKeys = Object.getOwnPropertyNames || function (o) {
+            var ar = [];
+            for (var k in o) if (Object.prototype.hasOwnProperty.call(o, k)) ar[ar.length] = k;
+            return ar;
+        };
+        return ownKeys(o);
+    };
+    return function (mod) {
+        if (mod && mod.__esModule) return mod;
+        var result = {};
+        if (mod != null) for (var k = ownKeys(mod), i = 0; i < k.length; i++) if (k[i] !== "default") __createBinding(result, mod, k[i]);
+        __setModuleDefault(result, mod);
+        return result;
+    };
+})();
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+const core = __importStar(__nccwpck_require__(7484));
+const github = __importStar(__nccwpck_require__(3228));
+const notion_1 = __nccwpck_require__(1986);
+const github_1 = __nccwpck_require__(9248);
+async function run() {
+    try {
+        const pr = github.context.payload.pull_request;
+        if (!pr) {
+            core.setFailed("❌ This action only runs on pull_request events.");
+            return;
+        }
+        const prTitle = pr.title;
+        const matches = [
+            ...prTitle.matchAll(/([a-zA-Z]+-\d+)(?=[^:]*:)/g),
+        ].map((m) => m[1]);
+        if (matches.length === 0) {
+            core.warning("⚠️ No ticket IDs found in PR title.");
+            return;
+        }
+        processMatches(matches);
+    }
+    catch (error) {
+        core.setFailed(error.message);
+    }
+}
+async function processMatches(matches) {
+    await Promise.all(matches.map(async (match) => {
+        const foundTaskInNotion = await (0, notion_1.findTaskUrlInNotion)(match);
+        if (!foundTaskInNotion) {
+            const msg = `❌ Task not found in Notion: ${match}`;
+            core.warning(msg);
+            return;
+        }
+        await (0, github_1.commentPR)(`✅ Linked task [${match}](${foundTaskInNotion.url})`);
+        await (0, notion_1.createOrUpdateRowInPrLinkDb)(foundTaskInNotion.id);
+    }));
+}
+run();
+
+
+/***/ }),
+
+/***/ 1986:
+/***/ (function(__unused_webpack_module, exports, __nccwpck_require__) {
+
+"use strict";
+
+var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    var desc = Object.getOwnPropertyDescriptor(m, k);
+    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
+      desc = { enumerable: true, get: function() { return m[k]; } };
+    }
+    Object.defineProperty(o, k2, desc);
+}) : (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    o[k2] = m[k];
+}));
+var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
+    Object.defineProperty(o, "default", { enumerable: true, value: v });
+}) : function(o, v) {
+    o["default"] = v;
+});
+var __importStar = (this && this.__importStar) || (function () {
+    var ownKeys = function(o) {
+        ownKeys = Object.getOwnPropertyNames || function (o) {
+            var ar = [];
+            for (var k in o) if (Object.prototype.hasOwnProperty.call(o, k)) ar[ar.length] = k;
+            return ar;
+        };
+        return ownKeys(o);
+    };
+    return function (mod) {
+        if (mod && mod.__esModule) return mod;
+        var result = {};
+        if (mod != null) for (var k = ownKeys(mod), i = 0; i < k.length; i++) if (k[i] !== "default") __createBinding(result, mod, k[i]);
+        __setModuleDefault(result, mod);
+        return result;
+    };
+})();
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.findTaskUrlInNotion = findTaskUrlInNotion;
+exports.createOrUpdateRowInPrLinkDb = createOrUpdateRowInPrLinkDb;
+const core = __importStar(__nccwpck_require__(7484));
+const github = __importStar(__nccwpck_require__(3228));
+const node_fetch_1 = __importDefault(__nccwpck_require__(6705));
+const config_1 = __nccwpck_require__(2973);
+async function findTaskUrlInNotion(taskId) {
+    const notionToken = core.getInput("notion_token");
+    const notionTasksDbId = core.getInput("notion_tasks_db_id");
+    const notionPropertyTaskId = core.getInput("notion_property_task_id");
+    const formattedTaskId = Number(taskId.split("-")[1]);
+    const res = await (0, node_fetch_1.default)(`https://api.notion.com/v1/databases/${notionTasksDbId}/query`, {
+        method: "POST",
+        headers: {
+            Authorization: `Bearer ${notionToken}`,
+            "Content-Type": "application/json",
+            "Notion-Version": "2022-06-28",
+        },
+        body: JSON.stringify({
+            filter: {
+                property: notionPropertyTaskId,
+                number: { equals: formattedTaskId },
+            },
+        }),
+    });
+    if (!res.ok) {
+        const error = await res.json();
+        core.setFailed(`❌ Notion API error: ${error.message}`);
+        return null;
+    }
+    const data = await res.json();
+    const task = data.results[0];
+    return task ? { id: task.id, url: task.url } : null;
+}
+async function createOrUpdateRowInPrLinkDb(taskId) {
+    const pr = github.context.payload.pull_request;
+    if (!pr) {
+        core.setFailed("❌ This action only runs on pull_request events.");
+        return;
+    }
+    const existingRowId = await findNotionRowByPrNumber(pr.number);
+    if (existingRowId) {
+        await updateNotionRow(existingRowId, pr, taskId);
+    }
+    else {
+        await createNotionRow(pr, taskId);
+    }
+}
+async function findNotionRowByPrNumber(prNumber) {
+    const notionToken = core.getInput("notion_token");
+    const notionPrLinkDbId = core.getInput("notion_pr_links_db_id");
+    const notionPropertiesConfig = (0, config_1.getNotionPropertiesConfig)();
+    core.info(`🔍 Searching for Notion row with PR number ${prNumber}`);
+    const res = await (0, node_fetch_1.default)(`https://api.notion.com/v1/databases/${notionPrLinkDbId}/query`, {
+        method: "POST",
+        headers: {
+            Authorization: `Bearer ${notionToken}`,
+            "Content-Type": "application/json",
+            "Notion-Version": "2022-06-28",
+        },
+        body: JSON.stringify({
+            filter: {
+                property: notionPropertiesConfig.notionPropertyPrNumber,
+                number: { equals: prNumber },
+            },
+        }),
+    });
+    if (!res.ok) {
+        const error = await res.json();
+        core.setFailed(`❌ Notion API error: ${error.message}`);
+        return null;
+    }
+    core.info(`✅ Found Notion row for PR number ${prNumber}`);
+    const data = await res.json();
+    return data.results[0].id || null;
+}
+function getPrState(pr) {
+    if (pr.state === "open") {
+        return "open";
+    }
+    else if (pr.state === "closed" && !pr.merged_at) {
+        return "closed";
+    }
+    else {
+        return "merged";
+    }
+}
+function getNotionPayload(pr, notionTasks) {
+    const notionPropertiesConfig = (0, config_1.getNotionPropertiesConfig)();
+    const properties = {
+        Name: {
+            title: [
+                {
+                    text: {
+                        content: pr.title,
+                    },
+                },
+            ],
+        },
+        [notionPropertiesConfig.notionPropertyPrNumber]: {
+            number: pr.number,
+        },
+        [notionPropertiesConfig.notionPropertyTasks]: {
+            relation: [...notionTasks.map((taskId) => ({ id: taskId }))],
+        },
+        [notionPropertiesConfig.notionPropertyCreatedAt]: {
+            date: {
+                start: pr.created_at,
+            },
+        },
+        [notionPropertiesConfig.notionPropertyUpdatedAt]: {
+            date: {
+                start: pr.updated_at,
+            },
+        },
+        [notionPropertiesConfig.notionPropertyState]: {
+            select: {
+                name: getPrState(pr),
+            },
+        },
+    };
+    if (pr.html_url) {
+        properties[notionPropertiesConfig.notionPropertyPrUrl] = {
+            url: pr.html_url,
+        };
+    }
+    if (pr.updated_at) {
+        properties[notionPropertiesConfig.notionPropertyUpdatedAt] = {
+            date: {
+                start: pr.updated_at,
+            },
+        };
+    }
+    if (pr.closed_at) {
+        properties[notionPropertiesConfig.notionPropertyClosedAt] = {
+            date: {
+                start: pr.closed_at,
+            },
+        };
+    }
+    if (pr.merged_at) {
+        properties[notionPropertiesConfig.notionPropertyMergedAt] = {
+            date: {
+                start: pr.merged_at,
+            },
+        };
+    }
+    if (pr.body) {
+        properties[notionPropertiesConfig.notionPropertyDescription] = {
+            rich_text: [
+                {
+                    text: {
+                        content: pr.body,
+                    },
+                },
+            ],
+        };
+    }
+    return properties;
+}
+async function updateNotionRow(rowid, pr, taskId) {
+    const notionToken = core.getInput("notion_token");
+    core.info(`🔄 Updating Notion row ${rowid}`);
+    const res = await (0, node_fetch_1.default)(`https://api.notion.com/v1/pages/${rowid}`, {
+        method: "PATCH",
+        headers: {
+            Authorization: `Bearer ${notionToken}`,
+            "Content-Type": "application/json",
+            "Notion-Version": "2022-06-28",
+        },
+        body: JSON.stringify({
+            parent: { page_id: rowid },
+            properties: getNotionPayload(pr, [taskId]),
+        }),
+    });
+    if (!res.ok) {
+        const error = await res.json();
+        core.setFailed(`❌ Notion API error: ${error.message}`);
+        return null;
+    }
+    return await res.json();
+}
+async function createNotionRow(pr, taskId) {
+    const notionToken = core.getInput("notion_token");
+    const notionPrLinkDbId = core.getInput("notion_pr_links_db_id");
+    core.info(`🔄 Creating Notion row for PR number ${pr.number}`);
+    const res = await (0, node_fetch_1.default)("https://api.notion.com/v1/pages", {
+        method: "POST",
+        headers: {
+            Authorization: `Bearer ${notionToken}`,
+            "Content-Type": "application/json",
+            "Notion-Version": "2022-06-28",
+        },
+        body: JSON.stringify({
+            parent: { database_id: notionPrLinkDbId },
+            properties: getNotionPayload(pr, [taskId]),
+        }),
+    });
+    if (!res.ok) {
+        const error = await res.json();
+        core.setFailed(`❌ Notion API error: ${error.message}`);
+        return null;
+    }
+    return await res.json();
+}
+
+
+/***/ }),
+
 /***/ 2078:
 /***/ ((module) => {
 
@@ -35814,273 +36282,12 @@ module.exports = /*#__PURE__*/JSON.parse('[[[0,44],"disallowed_STD3_valid"],[[45
 /******/ 	if (typeof __nccwpck_require__ !== 'undefined') __nccwpck_require__.ab = __dirname + "/";
 /******/ 	
 /************************************************************************/
-var __webpack_exports__ = {};
-const core = __nccwpck_require__(7484);
-const github = __nccwpck_require__(3228);
-const fetch = __nccwpck_require__(6705);
-
-async function run() {
-  try {
-    const notionToken = core.getInput("notion_token");
-    const notionTasksDatabaseId = core.getInput("notion_tasks_db_id");
-    const notionPullRequestLinksDbId = core.getInput("notion_pr_links_db_id");
-    const notionTaskId = core.getInput("notion_property_task_id");
-    const notionAssignee = core.getInput("notion_property_assignee");
-    const notionClosedAt = core.getInput("notion_property_closed_at");
-    const notionCreatedAt = core.getInput("notion_property_created_at");
-    const notionCreator = core.getInput("notion_property_creator");
-    const notionDescription = core.getInput("notion_property_description");
-    const notionMergedAt = core.getInput("notion_property_merged_at");
-    const notionPrNumber = core.getInput("notion_property_pr_number");
-    const notionReviewer = core.getInput("notion_property_reviewer");
-    const notionState = core.getInput("notion_property_state");
-    const notionUpdatedAt = core.getInput("notion_property_updated_at");
-    const notionTasks = core.getInput("notion_property_tasks");
-    const notionPrUrl = core.getInput("notion_property_pr_url");
-
-    const pr = github.context.payload.pull_request;
-
-    if (!pr) {
-      core.setFailed("❌ This action only runs on pull_request events.");
-      return;
-    }
-
-    const prTitle = pr.title;
-    const prNumber = pr.number;
-    const prUrl = pr.html_url;
-    const { owner, repo } = github.context.repo;
-
-    const matches = [...prTitle.matchAll(/([a-zA-Z]+-\d+)(?=[^:]*:)/g)].map(
-      (m) => m[1]
-    );
-
-    if (matches.length === 0) {
-      core.warning("⚠️ No ticket IDs found in PR title.");
-      return;
-    }
-
-    const octokit = github.getOctokit(process.env.GITHUB_TOKEN);
-
-    for (const taskId of matches) {
-      core.info(`🔎 Looking for task: ${taskId}`);
-
-      // Search Notion Task DB
-      const searchRes = await notionQuery(
-        notionToken,
-        notionTasksDatabaseId,
-        taskId,
-        notionTaskId
-      );
-
-      if (!searchRes || !searchRes.results || searchRes.results.length === 0) {
-        const msg = `❌ Task not found in Notion: ${taskId}`;
-        core.warning(msg);
-        continue;
-      }
-
-      const taskPage = searchRes.results[0];
-      const taskUrl = taskPage.url;
-
-      // Comment on PR
-      await commentPR(
-        octokit,
-        repo,
-        owner,
-        prNumber,
-        `✅ Linked task [${taskId}](${taskUrl})`
-      );
-
-      // Add row in PRs DB
-      await addPrToNotion(
-        notionToken,
-        notionPullRequestLinksDbId,
-        {
-          prTitle,
-          notionTasks: taskPage.id,
-          notionPrNumber: prNumber,
-          notionClosedAt: pr.closed_at,
-          notionCreatedAt: pr.created_at,
-          notionUpdatedAt: pr.updated_at,
-          notionCreator: pr.user ? pr.user.login : null,
-          notionDescription: pr.body ?? "",
-          notionMergedAt: pr.merged_at,
-          notionPrNumber: pr.number,
-          notionReviewer: pr.requested_reviewers
-            ? pr.requested_reviewers.map((r) => r.login)
-            : null,
-          notionState: getPrState(pr),
-          notionPrUrl: pr.html_url,
-        },
-        {
-          notionClosedAt: notionClosedAt,
-          notionCreatedAt: notionCreatedAt,
-          notionCreator: notionCreator,
-          notionDescription: notionDescription,
-          notionMergedAt: notionMergedAt,
-          notionPrNumber: notionPrNumber,
-          notionReviewer: notionReviewer,
-          notionPropertyState: notionState,
-          notionUpdatedAt: notionUpdatedAt,
-          notionTasks: notionTasks,
-          notionPrUrl: notionPrUrl,
-        }
-      );
-    }
-  } catch (err) {
-    core.setFailed(`❌ ${err.message}`);
-  }
-}
-
-function getPrState(pr) {
-  if (pr.state === "open") {
-    return "open";
-  } else if (pr.state === "closed" && !pr.merged_at) {
-    return "closed";
-  } else {
-    return "merged";
-  }
-}
-
-async function notionQuery(token, dbId, ticketId, notionTicketIdProperty) {
-  const formattedTicketId = Number(ticketId.split("-")[1]);
-  core.info(`🔍 Querying Notion for ticket ID number: ${formattedTicketId}`);
-
-  const res = await fetch(`https://api.notion.com/v1/databases/${dbId}/query`, {
-    method: "POST",
-    headers: {
-      Authorization: `Bearer ${token}`,
-      "Content-Type": "application/json",
-      "Notion-Version": "2022-06-28",
-    },
-    body: JSON.stringify({
-      filter: {
-        property: notionTicketIdProperty,
-        number: { equals: formattedTicketId },
-      },
-    }),
-  });
-
-  if (!res.ok) throw new Error(`Notion query failed: ${await res.text()}`);
-
-  return res.json();
-}
-
-async function addPrToNotion(
-  token,
-  dbId,
-  {
-    prTitle,
-    notionClosedAt,
-    notionCreatedAt,
-    notionUpdatedAt,
-    notionCreator,
-    notionDescription,
-    notionMergedAt,
-    notionPrNumber,
-    notionReviewer,
-    notionState,
-    notionTasks,
-    notionPrUrl,
-  },
-  notionConfig
-) {
-  const properties = {
-    Name: { title: [{ text: { content: prTitle } }] },
-  };
-
-  if (notionPrUrl) {
-    properties[notionConfig.notionPrUrl] = { url: notionPrUrl };
-  }
-  if (notionTasks) {
-    properties[notionConfig.notionTasks] = { relation: [{ id: notionTasks }] };
-  }
-  if (notionPrNumber) {
-    properties[notionConfig.notionPrNumber] = { number: notionPrNumber };
-  }
-  if (notionCreatedAt) {
-    properties[notionConfig.notionCreatedAt] = {
-      date: { start: notionCreatedAt },
-    };
-  }
-  if (notionUpdatedAt) {
-    properties[notionConfig.notionUpdatedAt] = {
-      date: { start: notionUpdatedAt },
-    };
-  }
-  if (notionClosedAt) {
-    properties[notionConfig.notionClosedAt] = {
-      date: { start: notionClosedAt },
-    };
-  }
-  if (notionMergedAt) {
-    properties[notionConfig.notionMergedAt] = {
-      date: { start: notionMergedAt },
-    };
-  }
-  //   if (notionCreator) {
-  //     properties[notionConfig.notionCreator] = {
-  //       rich_text: [{ text: { content: notionCreator } }],
-  //     };
-  //   }
-  if (notionDescription) {
-    properties[notionConfig.notionDescription] = {
-      rich_text: [{ text: { content: notionDescription } }],
-    };
-  }
-  if (notionReviewer && notionReviewer.length > 0) {
-    properties[notionConfig.notionReviewer] = {
-      multi_select: notionReviewer.map((r) => ({ name: r })),
-    };
-  }
-  if (notionState) {
-    properties[notionConfig.notionPropertyState] = {
-      select: { name: notionState },
-    };
-  }
-
-  const payload = {
-    parent: { database_id: dbId },
-    properties,
-  };
-
-  core.info(`➕ Payload: ${JSON.stringify(payload, null, 2)}`);
-
-  const res = await fetch("https://api.notion.com/v1/pages", {
-    method: "POST",
-    headers: {
-      Authorization: `Bearer ${token}`,
-      "Content-Type": "application/json",
-      "Notion-Version": "2022-06-28",
-    },
-    body: JSON.stringify(payload),
-  });
-
-  if (!res.ok) throw new Error(`Notion insert failed: ${await res.text()}`);
-}
-
-async function commentPR(octokit, repo, owner, prNumber, body) {
-  const { data: comments } = await octokit.rest.issues.listComments({
-    owner,
-    repo,
-    issue_number: prNumber,
-  });
-
-  const alreadyCommented = comments.some((c) => c.body?.includes(body));
-
-  if (alreadyCommented) {
-    return;
-  }
-
-  await octokit.rest.issues.createComment({
-    owner: owner,
-    repo: repo,
-    issue_number: prNumber,
-    body,
-  });
-}
-
-run();
-
-module.exports = __webpack_exports__;
+/******/ 	
+/******/ 	// startup
+/******/ 	// Load entry module and return exports
+/******/ 	// This entry module is referenced by other modules so it can't be inlined
+/******/ 	var __webpack_exports__ = __nccwpck_require__(9407);
+/******/ 	module.exports = __webpack_exports__;
+/******/ 	
 /******/ })()
 ;
