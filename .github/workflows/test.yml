@@ -2,7 +2,7 @@ name: Test PR to Notion
 
 on:
   pull_request:
-    types: [opened, edited, reopened, synchronize]
+    types: [opened, edited, reopened, synchronize, merged, closed]
 
 jobs:
   test:
