@@ -86,7 +86,7 @@ async function createOrUpdateRowInPrLinkDb(taskId) {
 }
 async function findNotionRowByPrNumber(prNumber) {
     const notionToken = core.getInput("notion_token");
-    const notionPrLinkDbId = core.getInput("notion_pr_link_db_id");
+    const notionPrLinkDbId = core.getInput("notion_pr_links_db_id");
     const notionPropertiesConfig = (0, config_1.getNotionPropertiesConfig)();
     core.info(`🔍 Searching for Notion row with PR number ${prNumber}`);
     const res = await (0, node_fetch_1.default)(`https://api.notion.com/v1/databases/${notionPrLinkDbId}/query`, {
@@ -220,7 +220,7 @@ async function updateNotionRow(rowid, pr, taskId) {
 }
 async function createNotionRow(pr, taskId) {
     const notionToken = core.getInput("notion_token");
-    const notionPrLinkDbId = core.getInput("notion_pr_link_db_id");
+    const notionPrLinkDbId = core.getInput("notion_pr_links_db_id");
     core.info(`🔄 Creating Notion row for PR number ${pr.number}`);
     const res = await (0, node_fetch_1.default)("https://api.notion.com/v1/pages", {
         method: "POST",

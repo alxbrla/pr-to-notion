@@ -63,7 +63,7 @@ async function findNotionRowByPrNumber(
   prNumber: number
 ): Promise<string | null> {
   const notionToken = core.getInput("notion_token");
-  const notionPrLinkDbId = core.getInput("notion_pr_link_db_id");
+  const notionPrLinkDbId = core.getInput("notion_pr_links_db_id");
   const notionPropertiesConfig = getNotionPropertiesConfig();
   core.info(`🔍 Searching for Notion row with PR number ${prNumber}`);
   const res = await fetch(
@@ -215,7 +215,7 @@ async function updateNotionRow(rowid: string, pr: any, taskId: string) {
 
 async function createNotionRow(pr: any, taskId: string) {
   const notionToken = core.getInput("notion_token");
-  const notionPrLinkDbId = core.getInput("notion_pr_link_db_id");
+  const notionPrLinkDbId = core.getInput("notion_pr_links_db_id");
 
   core.info(`🔄 Creating Notion row for PR number ${pr.number}`);
 
