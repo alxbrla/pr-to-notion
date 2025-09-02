@@ -36006,6 +36006,8 @@ async function addPrToNotion(
     },
   };
 
+  core.info(`➕ Payload: ${JSON.stringify(payload, null, 2)}`);
+
   const res = await fetch("https://api.notion.com/v1/pages", {
     method: "POST",
     headers: {
@@ -36026,9 +36028,7 @@ async function commentPR(octokit, repo, owner, prNumber, body) {
     issue_number: prNumber,
   });
 
-  const alreadyCommented = comments.some((c) =>
-    c.body?.includes(myCommentBody)
-  );
+  const alreadyCommented = comments.some((c) => c.body?.includes(body));
 
   if (alreadyCommented) {
     return;
