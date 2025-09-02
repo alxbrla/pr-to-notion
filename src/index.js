@@ -85,6 +85,7 @@ async function notionQuery(token, dbId, ticketId, notionTicketIdProperty) {
     headers: {
       Authorization: `Bearer ${token}`,
       "Content-Type": "application/json",
+      "Notion-Version": "2022-06-28",
     },
     body: JSON.stringify({
       filter: {
