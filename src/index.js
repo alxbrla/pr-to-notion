@@ -51,6 +51,8 @@ async function run() {
         continue;
       }
 
+      core.info(`🔍 Found ticket in Notion: ${ticketId}`);
+
       const ticketPage = searchRes.results[0];
       const ticketUrl = ticketPage.url;
 
@@ -127,6 +129,8 @@ async function addPrToNotion(
 }
 
 async function commentPR(octokit, repo, prNumber, body) {
+  core.info(`💬 Commenting on PR #${prNumber}: ${body}`);
+  core.info(`💬 Repo: ${repo}`);
   await octokit.rest.issues.createComment({
     owner: repo.split("/")[0],
     repo: repo.split("/")[1],
