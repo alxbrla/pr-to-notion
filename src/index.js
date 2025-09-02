@@ -211,9 +211,7 @@ async function commentPR(octokit, repo, owner, prNumber, body) {
     issue_number: prNumber,
   });
 
-  const alreadyCommented = comments.some((c) =>
-    c.body?.includes(myCommentBody)
-  );
+  const alreadyCommented = comments.some((c) => c.body?.includes(body));
 
   if (alreadyCommented) {
     return;
