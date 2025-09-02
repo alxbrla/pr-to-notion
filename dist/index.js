@@ -35894,17 +35894,19 @@ async function run() {
 }
 
 async function notionQuery(token, dbId, ticketId, notionTicketIdProperty) {
+  const formattedTicketId = Number(ticketId.split("-")[1]);
+  core.info(`🔍 Querying Notion for ticket ID number: ${formattedTicketId}`);
+
   const res = await fetch(`https://api.notion.com/v1/databases/${dbId}/query`, {
     method: "POST",
     headers: {
       Authorization: `Bearer ${token}`,
       "Content-Type": "application/json",
-      "Notion-Version": "2022-06-28",
     },
     body: JSON.stringify({
       filter: {
         property: notionTicketIdProperty,
-        number: { equals: Number(ticketId.split("-")[1]) },
+        number: { equals: formattedTicketId },
       },
     }),
   });
