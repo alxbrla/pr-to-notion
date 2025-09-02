@@ -90,7 +90,7 @@ async function run() {
           notionPrNumber: pr.number,
           notionReviewer: pr.requested_reviewers
             ? pr.requested_reviewers.map((r) => r.login)
-            : [],
+            : null,
           notionState: pr.state,
           notionPrUrl: pr.html_url,
         },
@@ -164,22 +164,22 @@ async function addPrToNotion(
       [notionConfig.notionPrUrl]: { url: notionPrUrl },
       [notionConfig.notionTasks]: { relation: [{ id: notionTasks }] },
       [notionConfig.notionPrNumber]: { number: notionPrNumber },
-      [notionConfig.notionPropertyCreatedAt]: {
+      [notionConfig.notionCreatedAt]: {
         date: { start: notionCreatedAt },
       },
-      [notionConfig.notionPropertyUpdatedAt]: {
+      [notionConfig.notionUpdatedAt]: {
         date: { start: notionUpdatedAt },
       },
-      [notionConfig.notionPropertyClosedAt]: {
+      [notionConfig.notionClosedAt]: {
         date: { start: notionClosedAt },
       },
-      [notionConfig.notionPropertyMergedAt]: {
+      [notionConfig.notionMergedAt]: {
         date: { start: notionMergedAt },
       },
-      [notionConfig.notionPropertyCreator]: {
+      [notionConfig.notionCreator]: {
         rich_text: [{ text: { content: notionCreator } }],
       },
-      [notionConfig.notionPropertyDescription]: {
+      [notionConfig.notionDescription]: {
         rich_text: [{ text: { content: notionDescription } }],
       },
       [notionConfig.notionReviewer]: {
