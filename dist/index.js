@@ -33879,6 +33879,14 @@ function wrappy (fn, cb) {
 
 /***/ }),
 
+/***/ 6595:
+/***/ ((module) => {
+
+module.exports = eval("require")("@octokit/rest");
+
+
+/***/ }),
+
 /***/ 2078:
 /***/ ((module) => {
 
@@ -35818,6 +35826,7 @@ var __webpack_exports__ = {};
 const core = __nccwpck_require__(7484);
 const github = __nccwpck_require__(3228);
 const fetch = __nccwpck_require__(6705);
+const { Octokit } = __nccwpck_require__(6595);
 
 async function run() {
   try {
@@ -35848,7 +35857,9 @@ async function run() {
       return;
     }
 
-    const octokit = github.getOctokit(process.env.GITHUB_TOKEN);
+    const octokit = new Octokit({
+      auth: process.env.GITHUB_TOKEN,
+    });
 
     for (const ticketId of matches) {
       core.info(`🔎 Looking for ticket: ${ticketId}`);
@@ -35950,12 +35961,15 @@ async function commentPR(octokit, repo, owner, prNumber, body) {
   core.info(`💬 Commenting on PR #${prNumber}: ${body}`);
   core.info(`💬 Repo: ${repo}`);
   core.info(`💬 Owner: ${owner}`);
-  await octokit.rest.issues.createComment({
-    owner: owner,
-    repo: repo,
-    issue_number: prNumber,
-    body,
-  });
+  await octokit.request(
+    "POST /repos/{owner}/{repo}/issues/{issue_number}/comments",
+    {
+      owner,
+      repo,
+      issue_number: prNumber,
+      body,
+    }
+  );
 }
 
 run();
