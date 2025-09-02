@@ -35902,7 +35902,7 @@ async function run() {
           notionCreatedAt: pr.created_at,
           notionUpdatedAt: pr.updated_at,
           notionCreator: pr.user ? pr.user.login : null,
-          notionDescription: pr.body,
+          notionDescription: pr.body ?? "",
           notionMergedAt: pr.merged_at,
           notionPrNumber: pr.number,
           notionReviewer: pr.requested_reviewers
