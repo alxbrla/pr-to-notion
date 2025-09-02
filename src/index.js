@@ -102,7 +102,7 @@ async function run() {
           notionMergedAt: notionMergedAt,
           notionPrNumber: notionPrNumber,
           notionReviewer: notionReviewer,
-          notionState: notionState,
+          notionPropertyState: notionState,
           notionUpdatedAt: notionUpdatedAt,
           notionTasks: notionTasks,
           notionPrUrl: notionPrUrl,
