@@ -35904,7 +35904,7 @@ async function notionQuery(token, dbId, ticketId, notionTicketIdProperty) {
     body: JSON.stringify({
       filter: {
         property: notionTicketIdProperty,
-        text: { equals: ticketId },
+        number: { equals: ticketId.split("-")[1] },
       },
     }),
   });
