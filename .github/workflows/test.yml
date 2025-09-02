@@ -8,7 +8,7 @@ jobs:
   test:
     runs-on: ubuntu-latest
     steps:
-      - uses: alxbrla/pr-to-notion@v1.5
+      - uses: alxbrla/pr-to-notion@v1.6
         with:
           notion_token: ${{ secrets.NOTION_TOKEN }}
           tickets_db_id: ${{ secrets.NOTION_TICKETS_DB }}
