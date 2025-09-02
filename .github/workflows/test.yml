@@ -1,0 +1,18 @@
+name: Test PR to Notion
+
+on:
+  pull_request_target:
+    types: [opened, edited, reopened, synchronize]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: alxbrla/pr-to-notion@v1.11
+        with:
+          notion_token: ${{ secrets.NOTION_TOKEN }}
+          tickets_db_id: ${{ secrets.NOTION_TICKETS_DB }}
+          prs_db_id: ${{ secrets.NOTION_PRS_DB }}
+          notion_ticket_id: ${{ secrets.NOTION_TICKET_ID }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

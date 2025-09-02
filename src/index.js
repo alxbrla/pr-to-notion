@@ -18,7 +18,7 @@ async function run() {
     const prTitle = pr.title;
     const prNumber = pr.number;
     const prUrl = pr.html_url;
-    const repo = github.context.repo.full_name;
+    const { owner, repo } = github.context.repo;
 
     core.info(`🔍 PR Title: ${prTitle}`);
 
@@ -28,6 +28,11 @@ async function run() {
     );
     if (matches.length === 0) {
       core.warning("⚠️ No ticket IDs found in PR title.");
+      return;
+    }
+
+    if (process.env.GITHUB_TOKEN === undefined) {
+      core.setFailed("❌ GITHUB_TOKEN is not defined.");
       return;
     }
 
@@ -51,6 +56,8 @@ async function run() {
         continue;
       }
 
+      core.info(`🔍 Found ticket in Notion: ${ticketId}`);
+
       const ticketPage = searchRes.results[0];
       const ticketUrl = ticketPage.url;
 
@@ -58,12 +65,14 @@ async function run() {
       await commentPR(
         octokit,
         repo,
+        owner,
         prNumber,
         `✅ Linked ticket [${ticketId}](${ticketUrl})`
       );
 
       // Add row in PRs DB
       await addPrToNotion(notionToken, prsDb, {
+        prTitle,
         prUrl,
         ticketId,
         ticketRelation: ticketPage.id,
@@ -76,6 +85,9 @@ async function run() {
 }
 
 async function notionQuery(token, dbId, ticketId, notionTicketIdProperty) {
+  const formattedTicketId = Number(ticketId.split("-")[1]);
+  core.info(`🔍 Querying Notion for ticket ID number: ${formattedTicketId}`);
+
   const res = await fetch(`https://api.notion.com/v1/databases/${dbId}/query`, {
     method: "POST",
     headers: {
@@ -86,7 +98,7 @@ async function notionQuery(token, dbId, ticketId, notionTicketIdProperty) {
     body: JSON.stringify({
       filter: {
         property: notionTicketIdProperty,
-        text: { equals: ticketId },
+        number: { equals: formattedTicketId },
       },
     }),
   });
@@ -97,11 +109,12 @@ async function notionQuery(token, dbId, ticketId, notionTicketIdProperty) {
 async function addPrToNotion(
   token,
   dbId,
-  { prUrl, ticketId, ticketRelation, prNumber }
+  { prTitle, prUrl, ticketId, ticketRelation, prNumber }
 ) {
   const payload = {
     parent: { database_id: dbId },
     properties: {
+      Name: { title: [{ text: { content: prTitle } }] },
       "PR URL": { url: prUrl },
       Ticket: { relation: [{ id: ticketRelation }] },
       "Ticket ID": { rich_text: [{ text: { content: ticketId } }] },
@@ -121,10 +134,13 @@ async function addPrToNotion(
   if (!res.ok) throw new Error(`Notion insert failed: ${await res.text()}`);
 }
 
-async function commentPR(octokit, repo, prNumber, body) {
+async function commentPR(octokit, repo, owner, prNumber, body) {
+  core.info(`💬 Commenting on PR #${prNumber}: ${body}`);
+  core.info(`💬 Repo: ${repo}`);
+  core.info(`💬 Owner: ${owner}`);
   await octokit.rest.issues.createComment({
-    owner: repo.split("/")[0],
-    repo: repo.split("/")[1],
+    owner: owner,
+    repo: repo,
     issue_number: prNumber,
     body,
   });
