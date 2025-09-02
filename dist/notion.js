@@ -139,7 +139,7 @@ function getNotionPayload(pr, notionTasks) {
             number: pr.number,
         },
         [notionPropertiesConfig.notionPropertyTasks]: {
-            relation: [{ id: notionTasks }],
+            relation: [...notionTasks.map((taskId) => ({ id: taskId }))],
         },
         [notionPropertiesConfig.notionPropertyCreatedAt]: {
             date: {
