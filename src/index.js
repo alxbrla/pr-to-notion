@@ -190,11 +190,11 @@ async function addPrToNotion(
       date: { start: notionMergedAt },
     };
   }
-  if (notionCreator) {
-    properties[notionConfig.notionCreator] = {
-      rich_text: [{ text: { content: notionCreator } }],
-    };
-  }
+  //   if (notionCreator) {
+  //     properties[notionConfig.notionCreator] = {
+  //       rich_text: [{ text: { content: notionCreator } }],
+  //     };
+  //   }
   if (notionDescription) {
     properties[notionConfig.notionDescription] = {
       rich_text: [{ text: { content: notionDescription } }],
