@@ -115,7 +115,7 @@ async function addPrToNotion(
     parent: { database_id: dbId },
     properties: {
       Name: { title: [{ text: { content: prTitle } }] },
-      "PR URL": { url: prUrl },
+      url: { url: prUrl },
       Ticket: { relation: [{ id: ticketRelation }] },
       "Ticket ID": { rich_text: [{ text: { content: ticketId } }] },
       "PR Number": { number: prNumber },
