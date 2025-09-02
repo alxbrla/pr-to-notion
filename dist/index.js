@@ -34297,6 +34297,7 @@ function getNotionPayload(pr, notionTasks) {
 }
 async function updateNotionRow(rowid, pr, taskId) {
     const notionToken = core.getInput("notion_token");
+    core.info(`🔄 Updating Notion row ${rowid}`);
     const res = await (0, node_fetch_1.default)(`https://api.notion.com/v1/pages/${rowid}`, {
         method: "PATCH",
         headers: {
