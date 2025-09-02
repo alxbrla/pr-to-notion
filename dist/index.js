@@ -34173,8 +34173,6 @@ async function findTaskUrlInNotion(taskId) {
     return task ? { id: task.id, url: task.url } : null;
 }
 async function createOrUpdateRowInPrLinkDb(taskId) {
-    const notionToken = core.getInput("notion_token");
-    const notionPrLinkDbId = core.getInput("notion_pr_link_db_id");
     const pr = github.context.payload.pull_request;
     if (!pr) {
         core.setFailed("❌ This action only runs on pull_request events.");
@@ -34225,7 +34223,6 @@ function getPrState(pr) {
     }
 }
 function getNotionPayload(pr, notionTasks) {
-    const notionPrLinkDbId = core.getInput("notion_pr_link_db_id");
     const notionPropertiesConfig = (0, config_1.getNotionPropertiesConfig)();
     const properties = {
         Name: {
@@ -34296,10 +34293,7 @@ function getNotionPayload(pr, notionTasks) {
             ],
         };
     }
-    return {
-        parent: { database_id: notionPrLinkDbId },
-        properties,
-    };
+    return properties;
 }
 async function updateNotionRow(rowid, pr, taskId) {
     const notionToken = core.getInput("notion_token");
@@ -34310,7 +34304,10 @@ async function updateNotionRow(rowid, pr, taskId) {
             "Content-Type": "application/json",
             "Notion-Version": "2022-06-28",
         },
-        body: JSON.stringify(getNotionPayload(pr, [taskId])),
+        body: JSON.stringify({
+            parent: { page_id: rowid },
+            properties: getNotionPayload(pr, [taskId]),
+        }),
     });
     if (!res.ok) {
         const error = await res.json();
@@ -34321,6 +34318,7 @@ async function updateNotionRow(rowid, pr, taskId) {
 }
 async function createNotionRow(pr, taskId) {
     const notionToken = core.getInput("notion_token");
+    const notionPrLinkDbId = core.getInput("notion_pr_link_db_id");
     const res = await (0, node_fetch_1.default)("https://api.notion.com/v1/pages", {
         method: "POST",
         headers: {
@@ -34328,7 +34326,10 @@ async function createNotionRow(pr, taskId) {
             "Content-Type": "application/json",
             "Notion-Version": "2022-06-28",
         },
-        body: JSON.stringify(getNotionPayload(pr, [taskId])),
+        body: JSON.stringify({
+            parent: { database_id: notionPrLinkDbId },
+            properties: getNotionPayload(pr, [taskId]),
+        }),
     });
     if (!res.ok) {
         const error = await res.json();
