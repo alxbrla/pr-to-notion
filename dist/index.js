@@ -35908,7 +35908,7 @@ async function run() {
           notionReviewer: pr.requested_reviewers
             ? pr.requested_reviewers.map((r) => r.login)
             : null,
-          notionState: pr.state,
+          notionState: getPrState(pr),
           notionPrUrl: pr.html_url,
         },
         {
@@ -35928,6 +35928,16 @@ async function run() {
     }
   } catch (err) {
     core.setFailed(`❌ ${err.message}`);
+  }
+}
+
+function getPrState(pr) {
+  if (pr.state === "open") {
+    return "open";
+  } else if (pr.state === "closed" && !pr.merged_at) {
+    return "closed";
+  } else {
+    return "merged";
   }
 }
 
