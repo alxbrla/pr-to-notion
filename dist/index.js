@@ -35822,11 +35822,24 @@ const fetch = __nccwpck_require__(6705);
 async function run() {
   try {
     const notionToken = core.getInput("notion_token");
-    const ticketsDb = core.getInput("tickets_db_id");
-    const prsDb = core.getInput("prs_db_id");
-    const notionTicketIdProperty = core.getInput("notion_ticket_id");
+    const notionTasksDatabaseId = core.getInput("notion_tasks_db_id");
+    const notionPullRequestLinksDbId = core.getInput("notion_pr_links_db_id");
+    const notionTaskId = core.getInput("notion_property_task_id");
+    const notionAssignee = core.getInput("notion_property_assignee");
+    const notionClosedAt = core.getInput("notion_property_closed_at");
+    const notionCreatedAt = core.getInput("notion_property_created_at");
+    const notionCreator = core.getInput("notion_property_creator");
+    const notionDescription = core.getInput("notion_property_description");
+    const notionMergedAt = core.getInput("notion_property_merged_at");
+    const notionPrNumber = core.getInput("notion_property_pr_number");
+    const notionReviewer = core.getInput("notion_property_reviewer");
+    const notionState = core.getInput("notion_property_state");
+    const notionUpdatedAt = core.getInput("notion_property_updated_at");
+    const notionTasks = core.getInput("notion_property_tasks");
+    const notionPrUrl = core.getInput("notion_property_pr_url");
 
     const pr = github.context.payload.pull_request;
+
     if (!pr) {
       core.setFailed("❌ This action only runs on pull_request events.");
       return;
@@ -35837,46 +35850,36 @@ async function run() {
     const prUrl = pr.html_url;
     const { owner, repo } = github.context.repo;
 
-    core.info(`🔍 PR Title: ${prTitle}`);
-
-    // Extract IDs before the colon
     const matches = [...prTitle.matchAll(/([a-zA-Z]+-\d+)(?=[^:]*:)/g)].map(
       (m) => m[1]
     );
+
     if (matches.length === 0) {
       core.warning("⚠️ No ticket IDs found in PR title.");
       return;
     }
 
-    if (process.env.GITHUB_TOKEN === undefined) {
-      core.setFailed("❌ GITHUB_TOKEN is not defined.");
-      return;
-    }
-
     const octokit = github.getOctokit(process.env.GITHUB_TOKEN);
 
-    for (const ticketId of matches) {
-      core.info(`🔎 Looking for ticket: ${ticketId}`);
+    for (const taskId of matches) {
+      core.info(`🔎 Looking for task: ${taskId}`);
 
-      // Search Notion Tickets DB
+      // Search Notion Task DB
       const searchRes = await notionQuery(
         notionToken,
-        ticketsDb,
-        ticketId,
-        notionTicketIdProperty
+        notionTasksDatabaseId,
+        taskId,
+        notionTaskId
       );
 
       if (!searchRes || !searchRes.results || searchRes.results.length === 0) {
-        const msg = `❌ Ticket not found in Notion: ${ticketId}`;
+        const msg = `❌ Task not found in Notion: ${taskId}`;
         core.warning(msg);
-        // await commentPR(octokit, repo, prNumber, msg);
         continue;
       }
 
-      core.info(`🔍 Found ticket in Notion: ${ticketId}`);
-
-      const ticketPage = searchRes.results[0];
-      const ticketUrl = ticketPage.url;
+      const taskPage = searchRes.results[0];
+      const taskUrl = taskPage.url;
 
       // Comment on PR
       await commentPR(
@@ -35884,17 +35887,44 @@ async function run() {
         repo,
         owner,
         prNumber,
-        `✅ Linked ticket [${ticketId}](${ticketUrl})`
+        `✅ Linked task [${taskId}](${taskUrl})`
       );
 
       // Add row in PRs DB
-      await addPrToNotion(notionToken, prsDb, {
-        prTitle,
-        prUrl,
-        ticketId,
-        ticketRelation: ticketPage.id,
-        prNumber,
-      });
+      await addPrToNotion(
+        notionToken,
+        notionPullRequestLinksDbId,
+        {
+          prTitle,
+          notionTasks: taskPage.id,
+          notionPrNumber: prNumber,
+          notionClosedAt: pr.closed_at,
+          notionCreatedAt: pr.created_at,
+          notionUpdatedAt: pr.updated_at,
+          notionCreator: pr.user ? pr.user.login : null,
+          notionDescription: pr.body,
+          notionMergedAt: pr.merged_at,
+          notionPrNumber: pr.number,
+          notionReviewer: pr.requested_reviewers
+            ? pr.requested_reviewers.map((r) => r.login)
+            : [],
+          notionState: pr.state,
+          notionPrUrl: pr.html_url,
+        },
+        {
+          notionClosedAt: notionClosedAt,
+          notionCreatedAt: notionCreatedAt,
+          notionCreator: notionCreator,
+          notionDescription: notionDescription,
+          notionMergedAt: notionMergedAt,
+          notionPrNumber: notionPrNumber,
+          notionReviewer: notionReviewer,
+          notionState: notionState,
+          notionUpdatedAt: notionUpdatedAt,
+          notionTasks: notionTasks,
+          notionPrUrl: notionPrUrl,
+        }
+      );
     }
   } catch (err) {
     core.setFailed(`❌ ${err.message}`);
@@ -35919,23 +35949,60 @@ async function notionQuery(token, dbId, ticketId, notionTicketIdProperty) {
       },
     }),
   });
+
   if (!res.ok) throw new Error(`Notion query failed: ${await res.text()}`);
+
   return res.json();
 }
 
 async function addPrToNotion(
   token,
   dbId,
-  { prTitle, prUrl, ticketId, ticketRelation, prNumber }
+  {
+    prTitle,
+    notionClosedAt,
+    notionCreatedAt,
+    notionUpdatedAt,
+    notionCreator,
+    notionDescription,
+    notionMergedAt,
+    notionPrNumber,
+    notionReviewer,
+    notionState,
+    notionTasks,
+    notionPrUrl,
+  },
+  notionConfig
 ) {
   const payload = {
     parent: { database_id: dbId },
     properties: {
       Name: { title: [{ text: { content: prTitle } }] },
-      url: { url: prUrl },
-      Ticket: { relation: [{ id: ticketRelation }] },
-      "Ticket ID": { rich_text: [{ text: { content: ticketId } }] },
-      "PR Number": { number: prNumber },
+      [notionConfig.notionPrUrl]: { url: notionPrUrl },
+      [notionConfig.notionTasks]: { relation: [{ id: notionTasks }] },
+      [notionConfig.notionPrNumber]: { number: notionPrNumber },
+      [notionConfig.notionPropertyCreatedAt]: {
+        date: { start: notionCreatedAt },
+      },
+      [notionConfig.notionPropertyUpdatedAt]: {
+        date: { start: notionUpdatedAt },
+      },
+      [notionConfig.notionPropertyClosedAt]: {
+        date: { start: notionClosedAt },
+      },
+      [notionConfig.notionPropertyMergedAt]: {
+        date: { start: notionMergedAt },
+      },
+      [notionConfig.notionPropertyCreator]: {
+        rich_text: [{ text: { content: notionCreator } }],
+      },
+      [notionConfig.notionPropertyDescription]: {
+        rich_text: [{ text: { content: notionDescription } }],
+      },
+      [notionConfig.notionPropertyReviewer]: {
+        multi_select: notionReviewer.map((r) => ({ name: r })),
+      },
+      [notionConfig.notionPropertyState]: { select: { name: notionState } },
     },
   };
 
@@ -35948,13 +36015,25 @@ async function addPrToNotion(
     },
     body: JSON.stringify(payload),
   });
+
   if (!res.ok) throw new Error(`Notion insert failed: ${await res.text()}`);
 }
 
 async function commentPR(octokit, repo, owner, prNumber, body) {
-  core.info(`💬 Commenting on PR #${prNumber}: ${body}`);
-  core.info(`💬 Repo: ${repo}`);
-  core.info(`💬 Owner: ${owner}`);
+  const { data: comments } = await octokit.rest.issues.listComments({
+    owner,
+    repo,
+    issue_number: prNumber,
+  });
+
+  const alreadyCommented = comments.some((c) =>
+    c.body?.includes(myCommentBody)
+  );
+
+  if (alreadyCommented) {
+    return;
+  }
+
   await octokit.rest.issues.createComment({
     owner: owner,
     repo: repo,
