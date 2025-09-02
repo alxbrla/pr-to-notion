@@ -64,6 +64,7 @@ async function run() {
 
       // Add row in PRs DB
       await addPrToNotion(notionToken, prsDb, {
+        prTitle,
         prUrl,
         ticketId,
         ticketRelation: ticketPage.id,
@@ -97,11 +98,12 @@ async function notionQuery(token, dbId, ticketId, notionTicketIdProperty) {
 async function addPrToNotion(
   token,
   dbId,
-  { prUrl, ticketId, ticketRelation, prNumber }
+  { prTitle, prUrl, ticketId, ticketRelation, prNumber }
 ) {
   const payload = {
     parent: { database_id: dbId },
     properties: {
+      Name: { title: [{ text: { content: prTitle } }] },
       "PR URL": { url: prUrl },
       Ticket: { relation: [{ id: ticketRelation }] },
       "Ticket ID": { rich_text: [{ text: { content: ticketId } }] },
