@@ -35999,7 +35999,7 @@ async function addPrToNotion(
       [notionConfig.notionPropertyDescription]: {
         rich_text: [{ text: { content: notionDescription } }],
       },
-      [notionConfig.notionPropertyReviewer]: {
+      [notionConfig.notionReviewer]: {
         multi_select: notionReviewer.map((r) => ({ name: r })),
       },
       [notionConfig.notionPropertyState]: { select: { name: notionState } },
