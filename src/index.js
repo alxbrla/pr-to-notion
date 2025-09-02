@@ -189,6 +189,8 @@ async function addPrToNotion(
     },
   };
 
+  core.info(`➕ Payload: ${JSON.stringify(payload, null, 2)}`);
+
   const res = await fetch("https://api.notion.com/v1/pages", {
     method: "POST",
     headers: {
