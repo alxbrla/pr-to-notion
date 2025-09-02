@@ -11,8 +11,8 @@ jobs:
       - uses: alxbrla/pr-to-notion@v1.12
         with:
           notion_token: ${{ secrets.NOTION_TOKEN }}
-          tickets_db_id: ${{ secrets.NOTION_TICKETS_DB }}
-          prs_db_id: ${{ secrets.NOTION_PRS_DB }}
-          notion_ticket_id: ${{ secrets.NOTION_TICKET_ID }}
+          notion_tasks_db_id: ${{ secrets.NOTION_TICKETS_DB }}
+          notion_pr_links_db_id: ${{ secrets.NOTION_PRS_DB }}
+          notion_property_task_id: ${{ secrets.NOTION_TICKET_ID }}
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
