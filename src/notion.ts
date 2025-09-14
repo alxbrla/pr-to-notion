@@ -107,7 +107,7 @@ async function findNotionRowByUrl(): Promise<string | null> {
   core.info(`✅ Found Notion row for PR number ${pr.number}`);
 
   const data = await res.json();
-  return data.results[0].id || null;
+  return data.results[0]?.id || null;
 }
 
 function getPrState(pr: any) {

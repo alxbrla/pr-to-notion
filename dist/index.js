@@ -34224,7 +34224,7 @@ async function findNotionRowByUrl() {
     }
     core.info(`✅ Found Notion row for PR number ${pr.number}`);
     const data = await res.json();
-    return data.results[0].id || null;
+    return data.results[0]?.id || null;
 }
 function getPrState(pr) {
     if (pr.state === "open") {
