@@ -34004,6 +34004,11 @@ async function commentPR(message) {
     if (alreadyCommented) {
         return;
     }
+    else {
+        core.info(`💬 Commenting on PR #${prNumber}: ${message}`);
+        // log all comments
+        comments.forEach((c) => core.info(`🗨️ Existing comment: ${c.body}`));
+    }
     await octokit.rest.issues.createComment({
         owner: owner,
         repo: repo,

@@ -29,6 +29,10 @@ export async function commentPR(message: string) {
 
   if (alreadyCommented) {
     return;
+  } else {
+    core.info(`💬 Commenting on PR #${prNumber}: ${message}`);
+    // log all comments
+    comments.forEach((c: any) => core.info(`🗨️ Existing comment: ${c.body}`));
   }
 
   await octokit.rest.issues.createComment({
