@@ -42,7 +42,7 @@ export async function findTaskUrlInNotion(
   return task ? { id: task.id, url: task.url } : null;
 }
 
-export async function upsertRowInPrLinkDb(taskId: string) {
+export async function upsertRowInPrLinkDb(tasks: string[]) {
   const pr = github.context.payload.pull_request;
 
   if (!pr) {
@@ -53,9 +53,9 @@ export async function upsertRowInPrLinkDb(taskId: string) {
   const existingRowId = await findNotionRowByUrl();
 
   if (existingRowId) {
-    await updateNotionRow(existingRowId, pr, taskId);
+    await updateNotionRow(existingRowId, pr, tasks);
   } else {
-    await createNotionRow(pr, taskId);
+    await createNotionRow(pr, tasks);
   }
 }
 
@@ -200,7 +200,7 @@ function getNotionPayload(pr: any, notionTasks: string[]) {
   return properties;
 }
 
-async function updateNotionRow(rowid: string, pr: any, taskId: string) {
+async function updateNotionRow(rowid: string, pr: any, tasks: string[]) {
   const notionToken = core.getInput("notion_token");
 
   core.info(`🔄 Updating Notion row ${rowid}`);
@@ -214,7 +214,7 @@ async function updateNotionRow(rowid: string, pr: any, taskId: string) {
     },
     body: JSON.stringify({
       parent: { page_id: rowid },
-      properties: getNotionPayload(pr, [taskId]),
+      properties: getNotionPayload(pr, tasks),
     }),
   });
 
@@ -227,7 +227,7 @@ async function updateNotionRow(rowid: string, pr: any, taskId: string) {
   return await res.json();
 }
 
-async function createNotionRow(pr: any, taskId: string) {
+async function createNotionRow(pr: any, tasks: string[]) {
   const notionToken = core.getInput("notion_token");
   const notionPrLinkDbId = core.getInput("notion_pr_links_db_id");
 
@@ -242,7 +242,7 @@ async function createNotionRow(pr: any, taskId: string) {
     },
     body: JSON.stringify({
       parent: { database_id: notionPrLinkDbId },
-      properties: getNotionPayload(pr, [taskId]),
+      properties: getNotionPayload(pr, tasks),
     }),
   });
 

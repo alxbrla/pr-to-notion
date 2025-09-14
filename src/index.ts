@@ -29,6 +29,7 @@ async function run() {
 }
 
 async function processMatches(matches: string[]) {
+  const tasks: string[] = [];
   await Promise.all(
     matches.map(async (match) => {
       const foundTaskInNotion = await findTaskUrlInNotion(match);
@@ -40,10 +41,10 @@ async function processMatches(matches: string[]) {
       }
 
       await commentPR(`✅ Linked task [${match}](${foundTaskInNotion.url})`);
-
-      await upsertRowInPrLinkDb(foundTaskInNotion.id);
+      tasks.push(foundTaskInNotion.id);
     })
   );
+  await upsertRowInPrLinkDb(tasks);
 }
 
 run();

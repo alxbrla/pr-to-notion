@@ -34080,6 +34080,7 @@ async function run() {
     }
 }
 async function processMatches(matches) {
+    const tasks = [];
     await Promise.all(matches.map(async (match) => {
         const foundTaskInNotion = await (0, notion_1.findTaskUrlInNotion)(match);
         if (!foundTaskInNotion) {
@@ -34088,8 +34089,9 @@ async function processMatches(matches) {
             return;
         }
         await (0, github_1.commentPR)(`✅ Linked task [${match}](${foundTaskInNotion.url})`);
-        await (0, notion_1.upsertRowInPrLinkDb)(foundTaskInNotion.id);
+        tasks.push(foundTaskInNotion.id);
     }));
+    await (0, notion_1.upsertRowInPrLinkDb)(tasks);
 }
 run();
 
@@ -34172,7 +34174,7 @@ async function findTaskUrlInNotion(taskId) {
     const task = data.results[0];
     return task ? { id: task.id, url: task.url } : null;
 }
-async function upsertRowInPrLinkDb(taskId) {
+async function upsertRowInPrLinkDb(tasks) {
     const pr = github.context.payload.pull_request;
     if (!pr) {
         core.setFailed("❌ This action only runs on pull_request events.");
@@ -34180,10 +34182,10 @@ async function upsertRowInPrLinkDb(taskId) {
     }
     const existingRowId = await findNotionRowByUrl();
     if (existingRowId) {
-        await updateNotionRow(existingRowId, pr, taskId);
+        await updateNotionRow(existingRowId, pr, tasks);
     }
     else {
-        await createNotionRow(pr, taskId);
+        await createNotionRow(pr, tasks);
     }
 }
 async function findNotionRowByUrl() {
@@ -34310,7 +34312,7 @@ function getNotionPayload(pr, notionTasks) {
     }
     return properties;
 }
-async function updateNotionRow(rowid, pr, taskId) {
+async function updateNotionRow(rowid, pr, tasks) {
     const notionToken = core.getInput("notion_token");
     core.info(`🔄 Updating Notion row ${rowid}`);
     const res = await (0, node_fetch_1.default)(`https://api.notion.com/v1/pages/${rowid}`, {
@@ -34322,7 +34324,7 @@ async function updateNotionRow(rowid, pr, taskId) {
         },
         body: JSON.stringify({
             parent: { page_id: rowid },
-            properties: getNotionPayload(pr, [taskId]),
+            properties: getNotionPayload(pr, tasks),
         }),
     });
     if (!res.ok) {
@@ -34332,7 +34334,7 @@ async function updateNotionRow(rowid, pr, taskId) {
     }
     return await res.json();
 }
-async function createNotionRow(pr, taskId) {
+async function createNotionRow(pr, tasks) {
     const notionToken = core.getInput("notion_token");
     const notionPrLinkDbId = core.getInput("notion_pr_links_db_id");
     core.info(`🔄 Creating Notion row for PR number ${pr.number}`);
@@ -34345,7 +34347,7 @@ async function createNotionRow(pr, taskId) {
         },
         body: JSON.stringify({
             parent: { database_id: notionPrLinkDbId },
-            properties: getNotionPayload(pr, [taskId]),
+            properties: getNotionPayload(pr, tasks),
         }),
     });
     if (!res.ok) {
