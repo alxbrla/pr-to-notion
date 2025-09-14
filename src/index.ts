@@ -1,6 +1,6 @@
 import * as core from "@actions/core";
 import * as github from "@actions/github";
-import { createOrUpdateRowInPrLinkDb, findTaskUrlInNotion } from "./notion";
+import { upsertRowInPrLinkDb, findTaskUrlInNotion } from "./notion";
 import { commentPR } from "./github";
 
 async function run() {
@@ -41,7 +41,7 @@ async function processMatches(matches: string[]) {
 
       await commentPR(`✅ Linked task [${match}](${foundTaskInNotion.url})`);
 
-      await createOrUpdateRowInPrLinkDb(foundTaskInNotion.id);
+      await upsertRowInPrLinkDb(foundTaskInNotion.id);
     })
   );
 }

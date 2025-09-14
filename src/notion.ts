@@ -42,7 +42,7 @@ export async function findTaskUrlInNotion(
   return task ? { id: task.id, url: task.url } : null;
 }
 
-export async function createOrUpdateRowInPrLinkDb(taskId: string) {
+export async function upsertRowInPrLinkDb(taskId: string) {
   const pr = github.context.payload.pull_request;
 
   if (!pr) {
@@ -50,7 +50,7 @@ export async function createOrUpdateRowInPrLinkDb(taskId: string) {
     return;
   }
 
-  const existingRowId = await findNotionRowByPrNumber(pr.number);
+  const existingRowId = await findNotionRowByUrl();
 
   if (existingRowId) {
     await updateNotionRow(existingRowId, pr, taskId);
@@ -59,13 +59,25 @@ export async function createOrUpdateRowInPrLinkDb(taskId: string) {
   }
 }
 
-async function findNotionRowByPrNumber(
-  prNumber: number
-): Promise<string | null> {
+async function findNotionRowByUrl(): Promise<string | null> {
+  const pr = github.context.payload.pull_request;
+
+  if (!pr) {
+    core.setFailed("❌ This action only runs on pull_request events.");
+    return null;
+  }
+
+  if (!process.env.GITHUB_TOKEN) {
+    core.setFailed("❌ GITHUB_TOKEN is not set.");
+    return null;
+  }
+
+  const { owner, repo } = github.context.repo;
+
   const notionToken = core.getInput("notion_token");
   const notionPrLinkDbId = core.getInput("notion_pr_links_db_id");
   const notionPropertiesConfig = getNotionPropertiesConfig();
-  core.info(`🔍 Searching for Notion row with PR number ${prNumber}`);
+  core.info(`🔍 Searching for Notion row with PR number ${pr.number}`);
   const res = await fetch(
     `https://api.notion.com/v1/databases/${notionPrLinkDbId}/query`,
     {
@@ -77,8 +89,10 @@ async function findNotionRowByPrNumber(
       },
       body: JSON.stringify({
         filter: {
-          property: notionPropertiesConfig.notionPropertyPrNumber,
-          number: { equals: prNumber },
+          property: notionPropertiesConfig.notionPropertyPrUrl,
+          url: {
+            equals: `https://github.com/${owner}/${repo}/pull/${pr.number}`,
+          },
         },
       }),
     }
@@ -90,7 +104,7 @@ async function findNotionRowByPrNumber(
     return null;
   }
 
-  core.info(`✅ Found Notion row for PR number ${prNumber}`);
+  core.info(`✅ Found Notion row for PR number ${pr.number}`);
 
   const data = await res.json();
   return data.results[0].id || null;

@@ -34088,7 +34088,7 @@ async function processMatches(matches) {
             return;
         }
         await (0, github_1.commentPR)(`✅ Linked task [${match}](${foundTaskInNotion.url})`);
-        await (0, notion_1.createOrUpdateRowInPrLinkDb)(foundTaskInNotion.id);
+        await (0, notion_1.upsertRowInPrLinkDb)(foundTaskInNotion.id);
     }));
 }
 run();
@@ -34139,7 +34139,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.findTaskUrlInNotion = findTaskUrlInNotion;
-exports.createOrUpdateRowInPrLinkDb = createOrUpdateRowInPrLinkDb;
+exports.upsertRowInPrLinkDb = upsertRowInPrLinkDb;
 const core = __importStar(__nccwpck_require__(7484));
 const github = __importStar(__nccwpck_require__(3228));
 const node_fetch_1 = __importDefault(__nccwpck_require__(6705));
@@ -34172,13 +34172,13 @@ async function findTaskUrlInNotion(taskId) {
     const task = data.results[0];
     return task ? { id: task.id, url: task.url } : null;
 }
-async function createOrUpdateRowInPrLinkDb(taskId) {
+async function upsertRowInPrLinkDb(taskId) {
     const pr = github.context.payload.pull_request;
     if (!pr) {
         core.setFailed("❌ This action only runs on pull_request events.");
         return;
     }
-    const existingRowId = await findNotionRowByPrNumber(pr.number);
+    const existingRowId = await findNotionRowByUrl();
     if (existingRowId) {
         await updateNotionRow(existingRowId, pr, taskId);
     }
@@ -34186,11 +34186,21 @@ async function createOrUpdateRowInPrLinkDb(taskId) {
         await createNotionRow(pr, taskId);
     }
 }
-async function findNotionRowByPrNumber(prNumber) {
+async function findNotionRowByUrl() {
+    const pr = github.context.payload.pull_request;
+    if (!pr) {
+        core.setFailed("❌ This action only runs on pull_request events.");
+        return null;
+    }
+    if (!process.env.GITHUB_TOKEN) {
+        core.setFailed("❌ GITHUB_TOKEN is not set.");
+        return null;
+    }
+    const { owner, repo } = github.context.repo;
     const notionToken = core.getInput("notion_token");
     const notionPrLinkDbId = core.getInput("notion_pr_links_db_id");
     const notionPropertiesConfig = (0, config_1.getNotionPropertiesConfig)();
-    core.info(`🔍 Searching for Notion row with PR number ${prNumber}`);
+    core.info(`🔍 Searching for Notion row with PR number ${pr.number}`);
     const res = await (0, node_fetch_1.default)(`https://api.notion.com/v1/databases/${notionPrLinkDbId}/query`, {
         method: "POST",
         headers: {
@@ -34200,8 +34210,10 @@ async function findNotionRowByPrNumber(prNumber) {
         },
         body: JSON.stringify({
             filter: {
-                property: notionPropertiesConfig.notionPropertyPrNumber,
-                number: { equals: prNumber },
+                property: notionPropertiesConfig.notionPropertyPrUrl,
+                url: {
+                    equals: `https://github.com/${owner}/${repo}/pull/${pr.number}`,
+                },
             },
         }),
     });
@@ -34210,7 +34222,7 @@ async function findNotionRowByPrNumber(prNumber) {
         core.setFailed(`❌ Notion API error: ${error.message}`);
         return null;
     }
-    core.info(`✅ Found Notion row for PR number ${prNumber}`);
+    core.info(`✅ Found Notion row for PR number ${pr.number}`);
     const data = await res.json();
     return data.results[0].id || null;
 }
