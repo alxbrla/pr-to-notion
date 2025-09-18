@@ -49,7 +49,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
-      - uses: alxbrla/pr-to-notion@v1
+      - uses: alxbrla/pr-to-notion@latest
         with:
           notion_token: ${{ secrets.NOTION_TOKEN }}
           notion_tasks_db_id: ${{ secrets.NOTION_TICKETS_DB }}
@@ -68,7 +68,7 @@ Replace the **notion_property_task_id** with the ID you configured in your notio
 You can customize the Notion database property names by adding these optional parameters:
 
 ```yaml
-- uses: alxbrla/pr-to-notion@v1
+- uses: alxbrla/pr-to-notion@latest
     with:
         notion_token: ${{ secrets.NOTION_TOKEN }}
         notion_tasks_db_id: ${{ secrets.NOTION_TICKETS_DB }}
