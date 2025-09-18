@@ -1,0 +1,25 @@
+{
+  "name": "pr-to-notion",
+  "version": "1.0.0",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "build": "tsc && ncc build src/index.ts -o dist"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "description": "",
+  "dependencies": {
+    "@actions/core": "^1.11.1",
+    "@actions/github": "^6.0.1",
+    "node-fetch": "^2.7.0"
+  },
+  "devDependencies": {
+    "@octokit/types": "^14.1.0",
+    "@types/node": "^24.3.0",
+    "@types/node-fetch": "^2.6.13",
+    "@vercel/ncc": "^0.38.3",
+    "typescript": "^5.9.2"
+  }
+}

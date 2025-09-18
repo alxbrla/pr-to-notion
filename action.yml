@@ -1,0 +1,62 @@
+name: "PR to Notion Sync"
+description: "Sync GitHub PRs with Notion tickets"
+author: "alxbrla"
+inputs:
+  notion_token:
+    description: "Notion integration token"
+    required: true
+
+  notion_tasks_db_id:
+    description: "Notion database ID containing tasks"
+    required: true
+
+  notion_pr_links_db_id:
+    description: "Notion database ID linking PRs with tasks"
+    required: true
+
+  notion_property_task_id:
+    description: "Notion Task ID property"
+    required: true
+
+  notion_property_closed_at:
+    description: "Property name for PR closed timestamp"
+    default: "Closed At"
+
+  notion_property_created_at:
+    description: "Property name for PR created timestamp"
+    default: "Created At"
+
+  notion_property_description:
+    description: "Property name for PR description"
+    default: "Description"
+
+  notion_property_merged_at:
+    description: "Property name for PR merged timestamp"
+    default: "Merged At"
+
+  notion_property_pr_number:
+    description: "Property name for PR number"
+    default: "PR Number"
+
+  notion_property_state:
+    description: "Property name for PR state"
+    default: "State"
+
+  notion_property_updated_at:
+    description: "Property name for PR updated timestamp"
+    default: "Updated At"
+
+  notion_property_tasks:
+    description: "Property name for linked tasks"
+    default: "Tasks"
+
+  notion_property_pr_url:
+    description: "Property name for PR URL"
+    default: "URL"
+
+runs:
+  using: "node20"
+  main: "dist/index.js"
+branding:
+  icon: "git-pull-request"
+  color: "blue"
