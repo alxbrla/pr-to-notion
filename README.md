@@ -46,7 +46,7 @@ The pull requests will appear on your linked tasks in Notion. You can then add N
 1. Create a new integration at [Notion Integrations](https://www.notion.so/my-integrations)
 2. Copy the Internal Integration Secret
 3. Create a database in Notion with these properties:
-   - **Title** (Title type) - Will store the PR title
+   - **Name** (Title type) - Will store the PR title. This property must be named exactly `Name`
    - **Tasks** (Relation type) - Relation to your tasks database
    - **URL** (URL type) - Will store the URL to the PR
    - **PR Number** (Number type) - Will store the PR number
@@ -64,6 +64,8 @@ The pull requests will appear on your linked tasks in Notion. You can then add N
 1. Verify that your tasks database has a column for ID number (auto generated)
    - Your task IDs should follow the format: `PREFIX-NUMBER` (e.g., `TASK-1`, `TASK-2`, `BUG-123`)
    - The prefix must contain only letters (no numbers allowed in the prefix)
+2. Share your tasks database with the integration too, otherwise the action cannot find your tasks nor link PRs to them
+3. Copy the tasks database ID from the URL
 
 ### 2. GitHub Token Setup
 
@@ -74,7 +76,7 @@ The pull requests will appear on your linked tasks in Notion. You can then add N
 
 Add these secrets to your repository (Settings → Secrets and variables → Actions → New repository secret):
 - `NOTION_TOKEN`: Your Notion Internal Integration Secret from step 1.2
-- `NOTION_TICKETS_DB`: Your Notion tasks database ID
+- `NOTION_TICKETS_DB`: Your Notion tasks database ID from step 1 (tasks database)
 - `NOTION_PRS_DB`: Your Notion GitHub PRs database ID from step 1.5
 
 ## Usage
@@ -93,7 +95,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
-      - uses: alxbrla/pr-to-notion@v1
+      - uses: alxbrla/pr-to-notion@v1.0.0
         with:
           notion_token: ${{ secrets.NOTION_TOKEN }}
           notion_tasks_db_id: ${{ secrets.NOTION_TICKETS_DB }}
@@ -121,7 +123,7 @@ Replace the `notion_property_task_id` value with the ID property name you config
 You can customize the Notion database property names to match your existing setup by adding these optional parameters:
 
 ```yaml
-- uses: alxbrla/pr-to-notion@v1
+- uses: alxbrla/pr-to-notion@v1.0.0
   with:
     notion_token: ${{ secrets.NOTION_TOKEN }}
     notion_tasks_db_id: ${{ secrets.NOTION_TICKETS_DB }}
@@ -129,7 +131,6 @@ You can customize the Notion database property names to match your existing setu
     # Required
     notion_property_task_id: "ID"
     # Optional - customize property names
-    notion_property_title: "Title"
     notion_property_pr_url: "URL"
     notion_property_pr_number: "PR Number"
     notion_property_closed_at: "Closed At"
@@ -144,7 +145,6 @@ You can customize the Notion database property names to match your existing setu
 ```
 
 If not specified, the action will use the default property names listed in the setup section:
-- **Title** → PR title
 - **URL** → PR URL
 - **PR Number** → PR number
 - **Closed At** → PR closed date
@@ -154,6 +154,8 @@ If not specified, the action will use the default property names listed in the s
 - **Description** → PR description/body
 - **State** → PR state (Open/Closed/Merged)
 - **Tasks** → Relation to tasks
+
+The PR title is always written to the title property named `Name`, which cannot be customized.
 
 ## Troubleshooting
 
@@ -165,7 +167,8 @@ If not specified, the action will use the default property names listed in the s
 
 ### Action fails with "Notion API error"
 
-- Verify that your Notion integration has access to both databases (check sharing settings)
+- Verify that your Notion integration has access to both databases, the GitHub PRs database and the tasks database (check sharing settings)
+- Verify that the title property of your GitHub PRs database is named `Name`
 - Ensure your `NOTION_TOKEN` secret is correct
 - Confirm database IDs are correct
 
