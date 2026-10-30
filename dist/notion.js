@@ -42,12 +42,30 @@ const core = __importStar(require("@actions/core"));
 const github = __importStar(require("@actions/github"));
 const node_fetch_1 = __importDefault(require("node-fetch"));
 const config_1 = require("./config");
+async function fetchWithRateLimit(url, options, retries = 3) {
+    for (let attempt = 0; attempt <= retries; attempt++) {
+        const res = await (0, node_fetch_1.default)(url, options);
+        if (res.status === 429) {
+            const retryAfter = res.headers.get("Retry-After");
+            const waitTime = retryAfter ? parseInt(retryAfter, 10) * 1000 : 5000;
+            core.warning(`⏳ Rate limited by Notion API. Waiting ${waitTime / 1000} seconds before retry (attempt ${attempt + 1}/${retries + 1})...`);
+            if (attempt < retries) {
+                await new Promise((resolve) => setTimeout(resolve, waitTime));
+                continue;
+            }
+            else {
+                throw new Error(`Rate limit exceeded after ${retries + 1} attempts. Please try again later.`);
+            }
+        }
+        return res;
+    }
+}
 async function findTaskUrlInNotion(taskId) {
     const notionToken = core.getInput("notion_token");
     const notionTasksDbId = core.getInput("notion_tasks_db_id");
     const notionPropertyTaskId = core.getInput("notion_property_task_id");
     const formattedTaskId = Number(taskId.split("-")[1]);
-    const res = await (0, node_fetch_1.default)(`https://api.notion.com/v1/databases/${notionTasksDbId}/query`, {
+    const res = await fetchWithRateLimit(`https://api.notion.com/v1/databases/${notionTasksDbId}/query`, {
         method: "POST",
         headers: {
             Authorization: `Bearer ${notionToken}`,
@@ -99,7 +117,7 @@ async function findNotionRowByUrl() {
     const notionPrLinkDbId = core.getInput("notion_pr_links_db_id");
     const notionPropertiesConfig = (0, config_1.getNotionPropertiesConfig)();
     core.info(`🔍 Searching for Notion row with PR number ${pr.number}`);
-    const res = await (0, node_fetch_1.default)(`https://api.notion.com/v1/databases/${notionPrLinkDbId}/query`, {
+    const res = await fetchWithRateLimit(`https://api.notion.com/v1/databases/${notionPrLinkDbId}/query`, {
         method: "POST",
         headers: {
             Authorization: `Bearer ${notionToken}`,
@@ -211,7 +229,7 @@ function getNotionPayload(pr, notionTasks) {
 async function updateNotionRow(rowid, pr, tasks) {
     const notionToken = core.getInput("notion_token");
     core.info(`🔄 Updating Notion row ${rowid}`);
-    const res = await (0, node_fetch_1.default)(`https://api.notion.com/v1/pages/${rowid}`, {
+    const res = await fetchWithRateLimit(`https://api.notion.com/v1/pages/${rowid}`, {
         method: "PATCH",
         headers: {
             Authorization: `Bearer ${notionToken}`,
@@ -234,7 +252,7 @@ async function createNotionRow(pr, tasks) {
     const notionToken = core.getInput("notion_token");
     const notionPrLinkDbId = core.getInput("notion_pr_links_db_id");
     core.info(`🔄 Creating Notion row for PR number ${pr.number}`);
-    const res = await (0, node_fetch_1.default)("https://api.notion.com/v1/pages", {
+    const res = await fetchWithRateLimit("https://api.notion.com/v1/pages", {
         method: "POST",
         headers: {
             Authorization: `Bearer ${notionToken}`,
