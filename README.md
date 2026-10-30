@@ -24,7 +24,7 @@ When you create a Pull Request, include your task ID in the title following this
 - `doc TASK-2: Update Documentation`
 - `doc TASK-2 & TASK-3 & TASK-4: Update Documentation`
 
-**Important rule:** Don't use spaces or `:` before the task IDs.
+**Important rule:** Task IDs must come before the first `:` of the title. Don't put a `:` before the task IDs.
 
 ### What happens automatically:
 
@@ -55,7 +55,7 @@ The pull requests will appear on your linked tasks in Notion. You can then add N
    - **Created At** (Date type) - Will store when the PR has been created
    - **Updated At** (Date type) - Will store when the PR has been updated
    - **Description** (Long text type) - Will store the PR's description
-   - **State** (Select type) - With 'Open, Closed, Merged' options, to store the PR's state
+   - **State** (Select type) - With lowercase `open`, `closed`, `merged` options, to store the PR's state
 4. Share your database with the integration
 5. Copy the database ID from the URL
 
@@ -88,13 +88,12 @@ name: PR to Notion Sync
 
 on:
   pull_request:
-    types: [opened, edited, reopened, synchronize, merged, closed]
+    types: [opened, edited, reopened, synchronize, closed]
 
 jobs:
   sync:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
       - uses: alxbrla/pr-to-notion@v1.0.0
         with:
           notion_token: ${{ secrets.NOTION_TOKEN }}
@@ -152,7 +151,7 @@ If not specified, the action will use the default property names listed in the s
 - **Created At** → PR created date
 - **Updated At** → PR updated date
 - **Description** → PR description/body
-- **State** → PR state (Open/Closed/Merged)
+- **State** → PR state (`open`/`closed`/`merged`)
 - **Tasks** → Relation to tasks
 
 The PR title is always written to the title property named `Name`, which cannot be customized.
